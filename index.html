@@ -157,7 +157,7 @@
 
   /* HERO */
   .hero { padding: 44px 24px 28px; text-align: center; }
-  .hero h2 { font-family: 'Syne', sans-serif; font-size: clamp(22px, 4vw, 36px); font-weight: 800; margin-bottom: 8px; }
+  .hero h2 { font-family: 'Syne', sans-serif; font-size: clamp(20px, 3vw, 32px); font-weight: 800; margin-bottom: 8px; }
   .hero p { font-size: 14px; color: var(--muted); }
 
   /* MENU GRID */
@@ -1079,39 +1079,51 @@ function showTourStep() {
     hl.style.height = (rect.height + 8) + 'px';
     hl.classList.add('active');
 
-    // Arrow
+    // Arrow + Box position (with edge-aware flipping)
     const arrowSize = 36;
-    let ax, ay;
+    const boxW = 270, boxH = 160;
+    let ax, ay, bx, by, arrowRotation;
+
     if (step.arrow === 'bottom') {
       ax = rect.left + rect.width / 2 - arrowSize / 2;
       ay = rect.bottom + 6;
-      arrow.style.transform = 'rotate(0deg)';
-    } else if (step.arrow === 'top') {
-      ax = rect.left + rect.width / 2 - arrowSize / 2;
-      ay = rect.top - arrowSize - 6;
-      arrow.style.transform = 'rotate(180deg)';
-    } else if (step.arrow === 'left') {
-      ax = rect.right + 6;
-      ay = rect.top + rect.height / 2 - arrowSize / 2;
-      arrow.style.transform = 'rotate(-90deg)';
-    }
-    arrow.style.left = Math.max(8, Math.min(ax, vw - arrowSize - 8)) + 'px';
-    arrow.style.top  = Math.max(8, Math.min(ay, vh - arrowSize - 8)) + 'px';
-    arrow.classList.add('active');
-
-    // Box position
-    const boxW = 270, boxH = 160;
-    let bx, by;
-    if (step.arrow === 'bottom') {
+      arrowRotation = 'rotate(0deg)';
       bx = rect.left + rect.width / 2 - boxW / 2;
       by = rect.bottom + arrowSize + 14;
     } else if (step.arrow === 'top') {
+      ax = rect.left + rect.width / 2 - arrowSize / 2;
+      ay = rect.top - arrowSize - 6;
+      arrowRotation = 'rotate(180deg)';
       bx = rect.left + rect.width / 2 - boxW / 2;
       by = rect.top - arrowSize - boxH - 14;
-    } else {
-      bx = rect.right + arrowSize + 14;
-      by = rect.top + rect.height / 2 - boxH / 2;
+    } else if (step.arrow === 'left') {
+      // Prefer placing box/arrow to the right of target.
+      // If there's not enough room on the right, flip to the left side.
+      const spaceRight = vw - rect.right;
+      const needed = arrowSize + boxW + 28;
+      if (spaceRight >= needed) {
+        ax = rect.right + 6;
+        ay = rect.top + rect.height / 2 - arrowSize / 2;
+        arrowRotation = 'rotate(-90deg)';
+        bx = rect.right + arrowSize + 14;
+        by = rect.top + rect.height / 2 - boxH / 2;
+      } else {
+        // Flip: arrow points right (toward target), box sits to the left
+        ax = rect.left - arrowSize - 6;
+        ay = rect.top + rect.height / 2 - arrowSize / 2;
+        arrowRotation = 'rotate(90deg)';
+        bx = rect.left - arrowSize - boxW - 14;
+        by = rect.top + rect.height / 2 - boxH / 2;
+      }
     }
+
+    ax = Math.max(8, Math.min(ax, vw - arrowSize - 8));
+    ay = Math.max(8, Math.min(ay, vh - arrowSize - 8));
+    arrow.style.left = ax + 'px';
+    arrow.style.top  = ay + 'px';
+    arrow.style.transform = arrowRotation;
+    arrow.classList.add('active');
+
     bx = Math.max(12, Math.min(bx, vw - boxW - 12));
     by = Math.max(12, Math.min(by, vh - boxH - 12));
     box.style.left = bx + 'px';
