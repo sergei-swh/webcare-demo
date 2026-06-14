@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EatWell — WebCare SENTINEL Demo</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0f8;
+    --muted: #7a7a96;
+    --accent: #c8ff00;
+    --accent-dim: rgba(200,255,0,0.1);
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  /* PRELOADER */
+  #preloader {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 99999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 44px;
+    transition: opacity 0.5s ease;
+  }
+
+  .pre-brand {
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase;
+  }
+
+  #pre-headline {
+    font-family: 'Syne', sans-serif; font-size: clamp(26px, 5vw, 48px); font-weight: 800;
+    text-align: center; line-height: 1.15;
+  }
+  #pre-headline span { color: var(--accent); }
+
+  .lang-picker { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+  .lang-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    padding: 13px 26px; border-radius: 8px; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+  }
+  .lang-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .lang-btn .flag { font-size: 18px; }
+
+  .pre-note { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+
+  /* RELOAD OVERLAY */
+  #reload-overlay {
+    position: fixed; inset: 0;
+    background: rgba(8,8,12,0.97);
+    z-index: 1000000; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  }
+  #reload-overlay.active { display: flex; }
+
+  .reload-logo {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+    color: var(--text); letter-spacing: 0.02em; margin-bottom: 32px;
+  }
+  .reload-logo span { color: var(--accent); }
+
+  .reload-terminal {
+    width: 320px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    min-height: 160px;
+  }
+
+  .reload-terminal-line {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 7px; opacity: 0;
+    animation: termLine 0.2s ease forwards;
+  }
+
+  @keyframes termLine {
+    from { opacity: 0; transform: translateX(-6px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .term-ok   { color: var(--accent); flex-shrink: 0; }
+  .term-warn { color: #ffa000; flex-shrink: 0; }
+  .term-text { color: var(--muted); }
+  .term-val  { color: var(--text); }
+
+  .rbar-wrap { width: 320px; height: 2px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .rbar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; transition: width 0.04s linear; }
+
+  .reload-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 10px; }
+
+  /* SITE */
+  #site { display: none; }
+  #site.visible { display: block; }
+
+  /* HEADER */
+  .site-header {
+    border-bottom: 1px solid var(--border); padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between; height: 58px;
+    position: sticky; top: 0; background: rgba(15,15,19,0.96); z-index: 100;
+  }
+
+  .site-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .site-logo span { color: var(--accent); }
+
+  .lang-switch { display: flex; gap: 3px; }
+  .lang-switch button {
+    background: none; border: 1px solid transparent; color: var(--muted);
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
+  }
+  .lang-switch button.active, .lang-switch button:hover {
+    border-color: var(--border); color: var(--text); background: var(--surface);
+  }
+
+  /* SENTINEL BAR */
+  .sentinel-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 9px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+
+  .sbar-left { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--muted); }
+
+  .sdot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    flex-shrink: 0; animation: sdpulse 2s infinite;
+  }
+  @keyframes sdpulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  .slabel {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--accent); text-transform: uppercase;
+  }
+
+  .sbar-right { display: flex; align-items: center; gap: 12px; }
+
+  .vtag { font-size: 11px; color: var(--muted); font-family: monospace; }
+
+  .reload-btn {
+    background: var(--accent); color: #000; border: none;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+    padding: 7px 15px; border-radius: 6px; cursor: pointer;
+    letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.15s;
+  }
+  .reload-btn:hover { background: #d4ff1a; transform: translateY(-1px); }
+  .reload-btn:active { transform: scale(0.97); }
+
+  /* HERO */
+  .hero { padding: 44px 24px 28px; text-align: center; }
+  .hero h2 { font-family: 'Syne', sans-serif; font-size: clamp(22px, 4vw, 36px); font-weight: 800; margin-bottom: 8px; }
+  .hero p { font-size: 14px; color: var(--muted); }
+
+  /* MENU GRID */
+  .menu-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px; padding: 0 24px 44px; max-width: 940px; margin: 0 auto;
+  }
+
+  .menu-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; transition: border-color 0.2s;
+  }
+  .menu-card:hover { border-color: rgba(255,255,255,0.14); }
+
+  .card-img {
+    width: 100%; height: 130px; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center; font-size: 48px;
+  }
+
+  .card-body { padding: 14px; }
+  .card-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+
+  .card-price {
+    font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700;
+    transition: color 0.5s;
+  }
+  .card-price.updated { color: var(--accent); }
+
+  .card-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    padding: 6px 13px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+  }
+  .card-btn:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* WEBCARE STRIP */
+  .wc-strip {
+    margin: 0 auto 44px; padding: 26px 30px;
+    max-width: 892px; margin-left: 24px; margin-right: 24px;
+    border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+
+  .wc-strip h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 5px; }
+  .wc-strip h3 span { color: var(--accent); }
+  .wc-strip p { font-size: 13px; color: var(--muted); max-width: 420px; line-height: 1.55; }
+
+  .wc-cta {
+    border: 1px solid var(--accent); color: var(--accent); background: none;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    padding: 10px 20px; border-radius: 7px; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; text-decoration: none; display: inline-block;
+  }
+  .wc-cta:hover { background: var(--accent); color: #000; }
+
+  /* FOOTER */
+  .site-footer {
+    border-top: 1px solid var(--border); padding: 18px 24px;
+    text-align: center; font-size: 12px; color: var(--muted);
+  }
+  .site-footer span { color: var(--accent); }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(70px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    color: var(--text); font-size: 13px; padding: 11px 18px;
+    border-radius: 8px; z-index: 800; transition: transform 0.3s ease; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* TOUR */
+  #tour-overlay {
+    position: fixed; inset: 0; z-index: 50000; pointer-events: none;
+  }
+
+  .tour-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    pointer-events: all;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .tour-backdrop.active { opacity: 1; }
+
+  .tour-box {
+    position: fixed; z-index: 50001;
+    background: var(--surface); border: 1px solid var(--accent);
+    border-radius: 10px; padding: 16px 18px; max-width: 260px;
+    pointer-events: all;
+    box-shadow: 0 0 0 1px rgba(200,255,0,0.15), 0 8px 32px rgba(0,0,0,0.5);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .tour-box.active { opacity: 1; transform: translateY(0); }
+
+  .tour-step-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 6px;
+  }
+
+  .tour-text {
+    font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 14px;
+  }
+
+  .tour-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+
+  .tour-dots { display: flex; gap: 5px; }
+  .tour-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--muted); transition: background 0.2s;
+  }
+  .tour-dot.active { background: var(--accent); }
+
+  .tour-next {
+    background: var(--accent); color: #000; border: none;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+    padding: 6px 14px; border-radius: 5px; cursor: pointer;
+    letter-spacing: 0.04em; transition: background 0.15s; white-space: nowrap;
+  }
+  .tour-next:hover { background: #d4ff1a; }
+
+  .tour-skip {
+    background: none; border: none; color: var(--muted);
+    font-family: 'Inter', sans-serif; font-size: 11px;
+    cursor: pointer; padding: 0; transition: color 0.15s;
+  }
+  .tour-skip:hover { color: var(--text); }
+
+  /* Pulse arrow */
+  .tour-arrow {
+    position: fixed; z-index: 50002; pointer-events: none;
+    width: 36px; height: 36px;
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .tour-arrow.active { opacity: 1; }
+  .tour-arrow svg { width: 36px; height: 36px; }
+
+  @keyframes arrowPulse {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-5px); opacity: 0.6; }
+  }
+  .tour-arrow.active svg { animation: arrowPulse 1.2s ease-in-out infinite; }
+
+  /* Highlight ring */
+  .tour-highlight {
+    position: fixed; z-index: 49999; border-radius: 8px;
+    box-shadow: 0 0 0 3px var(--accent), 0 0 0 6px rgba(200,255,0,0.15);
+    pointer-events: none;
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .tour-highlight.active { opacity: 1; }
+
+  /* ADMIN PANEL */
+  #admin-panel {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9990;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px; min-width: 220px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .admin-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .admin-title::before {
+    content: ''; display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent);
+  }
+
+  .admin-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 10px;
+  }
+  .admin-row:last-child { margin-bottom: 0; }
+
+  .admin-label { font-size: 12px; color: var(--text); }
+
+  .toggle {
+    position: relative; width: 36px; height: 20px; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .toggle-track::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; background: var(--muted);
+    border-radius: 50%; transition: all 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--accent-dim); border-color: var(--accent); }
+  .toggle input:checked + .toggle-track::after { background: var(--accent); transform: translateX(16px); }
+
+  /* FOMO BANNER */
+  #fomo-banner {
+    display: none; padding: 10px 24px;
+    background: #1a1400; border-bottom: 1px solid rgba(255,160,0,0.3);
+    align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  #fomo-banner.active { display: flex; }
+  #fomo-banner.urgent { background: #1a0000; border-color: rgba(255,60,60,0.4); }
+
+  .fomo-left { display: flex; align-items: center; gap: 9px; }
+  .fomo-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffa000; animation: sdpulse 1.2s infinite; }
+  #fomo-banner.urgent .fomo-dot { background: var(--red); }
+  .fomo-text { font-size: 13px; color: #ffd54f; }
+  #fomo-banner.urgent .fomo-text { color: #ff6b6b; }
+  .fomo-timer { font-family: monospace; font-size: 15px; font-weight: 700; color: #ffa000; letter-spacing: 0.05em; }
+  #fomo-banner.urgent .fomo-timer { color: var(--red); }
+
+  /* MODAL */
+  #block-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 9998; display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  #block-overlay.active { display: flex; }
+
+  #block-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 32px 28px; max-width: 380px; width: 100%;
+    position: relative; text-align: center;
+    z-index: 9999;
+  }
+
+  .modal-icon { font-size: 36px; margin-bottom: 16px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .modal-body { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+  .modal-body strong { color: var(--text); }
+
+  .modal-close {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 10px 24px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  }
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* PASSWORD GATE */
+  #gate {
+    position: fixed; inset: 0; background: var(--bg); z-index: 2000000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    font-family: 'Inter', sans-serif;
+  }
+  #gate.hidden { display: none; }
+  .gate-brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .gate-brand span { color: var(--accent); }
+  .gate-sub { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 8px; }
+  #gate input {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    padding: 12px 16px; border-radius: 8px; width: 220px; text-align: center;
+    letter-spacing: 0.2em;
+  }
+  #gate input:focus { outline: none; border-color: var(--accent); }
+  #gate-error { font-size: 12px; color: #ff6b6b; height: 16px; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-brand">Web<span>Care</span></div>
+  <div class="gate-sub">SENTINEL DEMO · ACCESS RESTRICTED</div>
+  <input type="password" id="gate-input" placeholder="Enter access code" autocomplete="off">
+  <div id="gate-error"></div>
+</div>
+
+<div id="preloader">
+  <div class="pre-brand">WebCare · SENTINEL Demo</div>
+  <div id="pre-headline">Welcome<br><span>Your friendly Sentinel</span></div>
+  <div style="font-size:11px;letter-spacing:0.12em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;">· Step 1 · Choose your language to begin ·</div>
+  <div class="lang-picker">
+    <button class="lang-btn" onclick="chooseLang('ru')"><span class="flag">🇷🇺</span> Русский</button>
+    <button class="lang-btn" onclick="chooseLang('en')"><span class="flag">🇬🇧</span> English</button>
+    <button class="lang-btn" onclick="chooseLang('es')"><span class="flag">🇪🇸</span> Español</button>
+  </div>
+  <div class="pre-note">SENTINEL · Language detection</div>
+</div>
+
+<!-- WELCOME MODAL -->
+<div id="welcome-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99998;display:none;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:32px 28px;max-width:360px;width:100%;text-align:center;">
+    <div style="font-size:32px;margin-bottom:16px;">🕷</div>
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;" id="welcome-title">Multilingual out of the box</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px;" id="welcome-body">This is a multilingual system. Languages are easily customizable for your audience.<br><br>Now let's show you how WebCare works on a real shop example.</div>
+    <button onclick="closeWelcome()" style="background:var(--accent);color:#000;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;padding:11px 28px;border-radius:8px;cursor:pointer;letter-spacing:0.04em;" id="welcome-btn">Let's go →</button>
+  </div>
+</div>
+
+<div id="reload-overlay">
+  <div class="reload-logo">Web<span>Care</span></div>
+  <div class="reload-terminal" id="reload-terminal"></div>
+  <div class="rbar-wrap"><div class="rbar" id="rbar"></div></div>
+  <div class="reload-sub">SENTINEL · Cache invalidation</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- BLOCK MODAL -->
+<div id="block-overlay">
+  <div id="block-modal">
+    <div class="modal-icon" id="modal-icon">🔒</div>
+    <div class="modal-title" id="modal-title">Сегодня выходной</div>
+    <div class="modal-body" id="modal-body">Сегодня мы не принимаем заказы.<br>Ждём вас <strong>завтра</strong>!</div>
+    <button class="modal-close" id="modal-close">OK</button>
+  </div>
+</div>
+
+<div id="site">
+  <header class="site-header">
+    <div class="site-logo">Eat<span>Well</span></div>
+    <div class="lang-switch">
+      <button onclick="switchLang('ru')" id="btn-ru">RU</button>
+      <button onclick="switchLang('en')" id="btn-en">EN</button>
+      <button onclick="switchLang('es')" id="btn-es">ES</button>
+    </div>
+  </header>
+
+  <!-- FOMO BANNER -->
+  <div id="fomo-banner">
+    <div class="fomo-left">
+      <div class="fomo-dot"></div>
+      <span class="fomo-text" id="fomo-text">Кухня закрывается через</span>
+    </div>
+    <span class="fomo-timer" id="fomo-timer">00:45:00</span>
+  </div>
+
+  <div class="sentinel-bar">
+    <div class="sbar-left">
+      <div class="sdot"></div>
+      <span class="slabel">SENTINEL</span>
+      <span id="sstatus">Меню актуально · обновлено сегодня</span>
+    </div>
+    <div class="sbar-right">
+      <span class="vtag" id="vtag">v1.0</span>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <button class="reload-btn" onclick="triggerReload()" id="rbtn">↻ Симулировать обновление</button>
+        <span id="rbtn-hint" style="font-size:10px;color:var(--muted);letter-spacing:0.03em;">Нажмите — увидите как клиент получает новую версию</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h2 id="hero-title">Свежее меню · Каждый день</h2>
+    <p id="hero-sub">Цены всегда актуальны — SENTINEL обновляет их автоматически</p>
+  </div>
+
+  <div class="menu-grid" id="menu-grid"></div>
+
+  <div class="wc-strip">
+    <div>
+      <h3 id="strip-title">Хотите это на своём сайте? → <span>WebCare</span></h3>
+      <p id="strip-desc">SENTINEL Core — скрипт который кладётся поверх любого сайта. Tilda, WordPress, Wix — без разницы. Клиенты всегда видят актуальные цены.</p>
+    </div>
+    <a href="mailto:soundraum@gmail.com" class="wc-cta" id="strip-cta">Узнать подробнее</a>
+  </div>
+
+  <footer class="site-footer"><span>WebCare</span> · SENTINEL Demo · webcare.works</footer>
+</div>
+
+<!-- TOUR -->
+<div id="tour-overlay">
+  <div class="tour-backdrop" id="tour-backdrop"></div>
+  <div class="tour-highlight" id="tour-highlight"></div>
+  <div class="tour-arrow" id="tour-arrow">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M18 6 L18 26 M10 18 L18 28 L26 18" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div class="tour-box" id="tour-box">
+    <div class="tour-step-label" id="tour-step-label">Step 1 of 6</div>
+    <div class="tour-text" id="tour-text"></div>
+    <div class="tour-footer">
+      <div class="tour-dots" id="tour-dots"></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="tour-skip" id="tour-skip">Skip tour</button>
+        <button class="tour-next" id="tour-next">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-title">SENTINEL · Админка</div>
+  <div class="admin-row">
+    <span class="admin-label" id="adm-lbl-emergency">🔴 Аварийное закрытие</span>
+    <label class="toggle"><input type="checkbox" id="tog-emergency" onchange="applyBlockMode('emergency')"><span class="toggle-track"></span></label>
+  </div>
+  <div class="admin-row">
+    <span class="admin-label" id="adm-lbl-dayoff">📅 Выходной день</span>
+    <label class="toggle"><input type="checkbox" id="tog-dayoff" onchange="applyBlockMode('dayoff')"><span class="toggle-track"></span></label>
+  </div>
+  <div class="admin-row">
+    <span class="admin-label" id="adm-lbl-evening-fomo">🌙 Вечер — скоро закрытие</span>
+    <label class="toggle"><input type="checkbox" id="tog-evening-fomo" onchange="applyBlockMode('evening-fomo')"><span class="toggle-track"></span></label>
+  </div>
+  <div class="admin-row">
+    <span class="admin-label" id="adm-lbl-evening-closed">🔒 Закрыто на ночь</span>
+    <label class="toggle"><input type="checkbox" id="tog-evening-closed" onchange="applyBlockMode('evening-closed')"><span class="toggle-track"></span></label>
+  </div>
+</div>
+
+<script>
+const T = {
+  ru: {
+    preHead: 'Добро пожаловать<br><span>Выберите язык</span>',
+    reloadText: 'Обновляем меню...',
+    rollbackText: 'Откатываем версию...',
+    status: 'Меню актуально · обновлено сегодня',
+    statusAfter: 'Обновлено только что · версия изменилась',
+    rbtnHint: 'Нажмите — увидите как клиент получает новую версию',
+    rbtnHintAfter: 'Нажмите — откатите к старым ценам',
+    rbtnAfter: '↺ Откатить версию',
+    heroTitle: 'Свежее меню · Каждый день',
+    heroSub: 'Клиент говорит "у меня на телефоне другая цена"? SENTINEL сбрасывает версию кэша на стороне клиента — и спора больше нет.',
+    stripTitle: 'Хотите это на своём сайте? → <span>WebCare</span>',
+    stripDesc: 'SENTINEL Core — скрипт который кладётся поверх любого сайта. Tilda, WordPress, Wix — без разницы. Клиенты всегда видят актуальные цены.',
+    stripCta: 'Узнать подробнее',
+    addBtn: 'В корзину',
+    toast: '✓ Меню обновлено — цены актуальны',
+    toastRollback: '↺ Версия откатана — старые цены',
+    block: {
+      emergency: {
+        icon: '🐙',
+        title: 'Houston, we have a problem',
+        body: 'Наш осьминог-кассир сбежал из аквариума и добрался до сервера.<br>Работаем над поимкой. Вернёмся <strong>завтра</strong>.<br><br><em style="font-size:12px;color:#666">* Никакие осьминоги в процессе не пострадали</em>'
+      },
+      dayoff: {
+        icon: '🏖️',
+        title: 'Шеф взял выходной',
+        body: 'Сегодня наш шеф наконец-то отдыхает.<br>Меню доступно для мечтаний — заказы завтра.<br><br><strong>Ждём вас!</strong>'
+      },
+      evening: {
+        icon: '🌙',
+        title: 'Кухня уже закрыта',
+        body: 'Повара ушли домой. Заказы до <strong>21:00</strong>.<br>Заходите завтра — накормим!'
+      },
+    },
+    fomo: 'Кухня закрывается через',
+    fomoUrgent: 'Последний шанс заказать!',
+    admEmergency: '🔴 Аварийное закрытие',
+    admDayoff: '📅 Выходной день',
+    admEveningFomo: '🌙 Вечер — скоро закрытие',
+    admEveningClosed: '🔒 Закрыто на ночь',
+    admTitle: 'SENTINEL · Админка',
+    modalClose: 'Понятно',
+  },
+  en: {
+    preHead: 'Welcome<br><span>Choose your language</span>',
+    reloadText: 'Updating menu...',
+    rollbackText: 'Rolling back version...',
+    status: 'Menu is fresh · updated today',
+    statusAfter: 'Just updated · version changed',
+    rbtnHint: 'Press — see how the customer gets the new version',
+    rbtnHintAfter: 'Press — roll back to old prices',
+    rbtnAfter: '↺ Roll back version',
+    heroTitle: 'Fresh menu · Every day',
+    heroSub: 'Customer insisting they have a different price on their phone? SENTINEL resets the cache version on their side — no more arguments.',
+    stripTitle: 'Want this on your site? → <span>WebCare</span>',
+    stripDesc: 'SENTINEL Core — a script that sits on top of any website. Tilda, WordPress, Wix — doesn\'t matter. Customers always see current prices.',
+    stripCta: 'Learn more',
+    addBtn: 'Add to cart',
+    toast: '✓ Menu updated — prices are current',
+    toastRollback: '↺ Version rolled back — old prices',
+    block: {
+      emergency: {
+        icon: '🐙',
+        title: 'Houston, we have a problem',
+        body: 'Our octopus cashier escaped the tank and reached the server.<br>We\'re working on the capture. Back <strong>tomorrow</strong>.<br><br><em style="font-size:12px;color:#666">* No octopuses were harmed in this process</em>'
+      },
+      dayoff: {
+        icon: '🏖️',
+        title: 'Chef\'s Day Off',
+        body: 'Our chef is finally getting some rest today.<br>Menu is available for dreaming — orders resume tomorrow.<br><br><strong>See you soon!</strong>'
+      },
+      evening: {
+        icon: '🌙',
+        title: 'Kitchen is Closed',
+        body: 'The cooks went home. Orders accepted until <strong>9:00 PM</strong>.<br>Come back tomorrow — we\'ll feed you!'
+      },
+    },
+    fomo: 'Kitchen closes in',
+    fomoUrgent: 'Last chance to order!',
+    admEmergency: '🔴 Emergency close',
+    admDayoff: '📅 Day off',
+    admEveningFomo: '🌙 Evening — closing soon',
+    admEveningClosed: '🔒 Closed for the night',
+    admTitle: 'SENTINEL · Admin',
+    modalClose: 'Got it',
+  },
+  es: {
+    preHead: 'Bienvenido<br><span>Elige tu idioma</span>',
+    reloadText: 'Actualizando menú...',
+    rollbackText: 'Revirtiendo versión...',
+    status: 'Menú actualizado · renovado hoy',
+    statusAfter: 'Recién actualizado · versión cambiada',
+    rbtnHint: 'Pulsa — ve cómo el cliente recibe la nueva versión',
+    rbtnHintAfter: 'Pulsa — vuelve a los precios anteriores',
+    rbtnAfter: '↺ Revertir versión',
+    heroTitle: 'Menú fresco · Cada día',
+    heroSub: '¿El cliente insiste en que tiene otro precio en su teléfono? SENTINEL resetea la versión del caché en su dispositivo — sin más discusiones.',
+    stripTitle: '¿Lo quieres en tu web? → <span>WebCare</span>',
+    stripDesc: 'SENTINEL Core — un script que se coloca encima de cualquier web. Tilda, WordPress, Wix — no importa. Los clientes siempre ven precios actuales.',
+    stripCta: 'Saber más',
+    addBtn: 'Añadir',
+    toast: '✓ Menú actualizado — precios al día',
+    toastRollback: '↺ Versión revertida — precios anteriores',
+    block: {
+      emergency: {
+        icon: '🐙',
+        title: 'Houston, tenemos un problema',
+        body: 'Nuestro pulpo cajero escapó del tanque y llegó al servidor.<br>Estamos trabajando en su captura. Volvemos <strong>mañana</strong>.<br><br><em style="font-size:12px;color:#666">* Ningún pulpo fue dañado en el proceso</em>'
+      },
+      dayoff: {
+        icon: '🏖️',
+        title: 'Día libre del chef',
+        body: 'Hoy nuestro chef por fin descansa.<br>El menú está disponible para soñar — pedidos mañana.<br><br><strong>¡Hasta pronto!</strong>'
+      },
+      evening: {
+        icon: '🌙',
+        title: 'Cocina cerrada',
+        body: 'Los cocineros se fueron a casa. Pedidos hasta las <strong>21:00</strong>.<br>¡Vuelve mañana, te daremos de comer!'
+      },
+    },
+    fomo: 'La cocina cierra en',
+    fomoUrgent: '¡Última oportunidad para pedir!',
+    admEmergency: '🔴 Cierre de emergencia',
+    admDayoff: '📅 Día libre',
+    admEveningFomo: '🌙 Tarde — cierre próximo',
+    admEveningClosed: '🔒 Cerrado por la noche',
+    admTitle: 'SENTINEL · Admin',
+    modalClose: 'Entendido',
+  }
+};
+
+const MENU = [
+  { e:'🍣', ru:['Филадельфия','Лосось, сливочный сыр, огурец'], en:['Philadelphia','Salmon, cream cheese, cucumber'], es:['Philadelphia','Salmón, queso crema, pepino'], p:14, p2:16 },
+  { e:'🥑', ru:['Калифорния','Краб, авокадо, икра тобико'], en:['California','Crab, avocado, tobiko caviar'], es:['California','Cangrejo, aguacate, huevas tobiko'], p:12.5, p2:13.5 },
+  { e:'🐉', ru:['Дракон','Угорь, авокадо, унаги соус'], en:['Dragon Roll','Eel, avocado, unagi sauce'], es:['Rollo Dragón','Anguila, aguacate, salsa unagi'], p:16, p2:17 },
+  { e:'🍱', ru:['Спайси тунец','Тунец, спайси майо, лук'], en:['Spicy Tuna','Tuna, spicy mayo, scallions'], es:['Atún Picante','Atún, mayonesa picante, cebolleta'], p:13, p2:15 },
+  { e:'🦐', ru:['Темпура','Креветка в кляре, соус'], en:['Tempura','Battered shrimp, dipping sauce'], es:['Tempura','Gamba rebozada, salsa'], p:15, p2:15 },
+  { e:'🥢', ru:['Радуга','Ассорти рыбы, авокадо'], en:['Rainbow Roll','Assorted fish, avocado'], es:['Rollo Arcoíris','Surtido de pescado, aguacate'], p:18, p2:19 },
+];
+
+let lang = 'ru', ver = 1, updated = false;
+
+const WELCOME = {
+  ru: {
+    title: 'Мультиязычность из коробки',
+    body: 'Система изначально поддерживает несколько языков. Языки легко настраиваются под вашу аудиторию.<br><br>Сейчас покажем как WebCare работает на примере магазина.',
+    btn: 'Поехали →',
+  },
+  en: {
+    title: 'Multilingual out of the box',
+    body: 'The system supports multiple languages from day one. Languages are easily customizable for your audience.<br><br>Now let\'s show you how WebCare works on a real shop example.',
+    btn: "Let's go →",
+  },
+  es: {
+    title: 'Multilingüe desde el primer momento',
+    body: 'El sistema admite varios idiomas desde el primer día. Los idiomas son fácilmente personalizables para tu audiencia.<br><br>Ahora vamos a mostrarte cómo funciona WebCare con un ejemplo real.',
+    btn: 'Vamos →',
+  },
+};
+
+function chooseLang(l) {
+  lang = l;
+  const pre = document.getElementById('preloader');
+  pre.style.opacity = '0';
+  setTimeout(() => {
+    pre.style.display = 'none';
+    // Show welcome modal in chosen language
+    const w = WELCOME[lang];
+    document.getElementById('welcome-title').textContent = w.title;
+    document.getElementById('welcome-body').innerHTML = w.body;
+    document.getElementById('welcome-btn').textContent = w.btn;
+    document.getElementById('welcome-overlay').style.display = 'flex';
+  }, 480);
+}
+
+function closeWelcome() {
+  document.getElementById('welcome-overlay').style.display = 'none';
+  document.getElementById('site').classList.add('visible');
+  render(); applyLang();
+  setTimeout(startTour, 500);
+}
+
+function switchLang(l) {
+  lang = l;
+  ['ru','en','es'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===l));
+  applyLang(); render();
+}
+
+function applyLang() {
+  const t = T[lang];
+  ['ru','en','es'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===lang));
+  document.getElementById('sstatus').textContent = updated ? t.statusAfter : t.status;
+  document.getElementById('rbtn').textContent = updated ? t.rbtnAfter : t.rbtn;
+  document.getElementById('rbtn-hint').textContent = updated ? t.rbtnHintAfter : t.rbtnHint;
+  document.getElementById('hero-title').textContent = t.heroTitle;
+  document.getElementById('hero-sub').textContent = t.heroSub;
+  document.getElementById('strip-title').innerHTML = t.stripTitle;
+  document.getElementById('strip-desc').textContent = t.stripDesc;
+  document.getElementById('strip-cta').textContent = t.stripCta;
+  document.getElementById('modal-close').textContent = t.modalClose;
+  document.getElementById('adm-lbl-emergency').textContent = t.admEmergency;
+  document.getElementById('adm-lbl-dayoff').textContent = t.admDayoff;
+  document.getElementById('adm-lbl-evening-fomo').textContent = t.admEveningFomo;
+  document.getElementById('adm-lbl-evening-closed').textContent = t.admEveningClosed;
+  document.querySelector('.admin-title').textContent = t.admTitle;
+  updateFomoBanner();
+  updateBlockModal();
+}
+
+let blockMode = null; // null | 'emergency' | 'dayoff' | 'evening-fomo' | 'evening-closed'
+let fomoSeconds = 45 * 60;
+let fomoInterval = null;
+
+const TOGGLES = ['emergency','dayoff','evening-fomo','evening-closed'];
+
+function applyBlockMode(activated) {
+  // Mutual exclusion — turn off all others
+  TOGGLES.forEach(id => {
+    if (id !== activated) {
+      const el = document.getElementById('tog-' + id);
+      if (el) el.checked = false;
+    }
+  });
+
+  const el = document.getElementById('tog-' + activated);
+  blockMode = (el && el.checked) ? activated : null;
+
+  updateFomoBanner();
+  updateBlockModal();
+  updateCardButtons();
+}
+
+function updateCardButtons() {
+  // evening-fomo = FOMO only, buttons stay active
+  const blocked = blockMode !== null && blockMode !== 'evening-fomo';
+  document.querySelectorAll('.card-btn').forEach(btn => {
+    btn.disabled = blocked;
+    btn.style.opacity = blocked ? '0.4' : '1';
+    btn.style.cursor = blocked ? 'not-allowed' : 'pointer';
+    if (blocked) {
+      btn.onclick = (e) => { e.preventDefault(); showBlockModal(); };
+    } else {
+      btn.onclick = null;
+    }
+  });
+}
+
+function showBlockModal() {
+  document.getElementById('block-overlay').classList.add('active');
+}
+
+function updateBlockModal() {
+  // evening-fomo never shows modal — it's just a banner
+  if (!blockMode || blockMode === 'evening-fomo') {
+    document.getElementById('block-overlay').classList.remove('active');
+    return;
+  }
+  const t = T[lang];
+  const key = blockMode === 'evening-closed' ? 'evening' : blockMode;
+  const b = t.block[key];
+  document.getElementById('modal-icon').textContent = b.icon;
+  document.getElementById('modal-title').textContent = b.title;
+  document.getElementById('modal-body').innerHTML = b.body;
+  document.getElementById('modal-close').textContent = t.modalClose;
+  document.getElementById('block-overlay').classList.add('active');
+}
+
+function updateFomoBanner() {
+  const banner = document.getElementById('fomo-banner');
+  const t = T[lang];
+  if (blockMode === 'evening-fomo') {
+    banner.classList.add('active');
+    document.getElementById('fomo-text').textContent = t.fomo;
+    startFomoTimer();
+  } else {
+    banner.classList.remove('active', 'urgent');
+    stopFomoTimer();
+    fomoSeconds = 45 * 60;
+    document.getElementById('fomo-timer').textContent = '00:45:00';
+  }
+}
+
+function startFomoTimer() {
+  if (fomoInterval) return;
+  fomoInterval = setInterval(() => {
+    fomoSeconds = Math.max(0, fomoSeconds - 1);
+    const h = Math.floor(fomoSeconds / 3600);
+    const m = Math.floor((fomoSeconds % 3600) / 60);
+    const s = fomoSeconds % 60;
+    const display = h > 0
+      ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('fomo-timer').textContent = display;
+    const banner = document.getElementById('fomo-banner');
+    if (fomoSeconds < 15 * 60) {
+      banner.classList.add('urgent');
+      document.getElementById('fomo-text').textContent = T[lang].fomoUrgent;
+    }
+  }, 1000);
+}
+
+function stopFomoTimer() {
+  clearInterval(fomoInterval);
+  fomoInterval = null;
+}
+
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('block-overlay').classList.remove('active');
+});
+document.getElementById('block-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) document.getElementById('block-overlay').classList.remove('active');
+});
+
+function render() {
+  const t = T[lang];
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = MENU.map(item => {
+    const [name, desc] = item[lang];
+    const price = updated ? item.p2 : item.p;
+    const changed = updated;
+    return `<div class="menu-card">
+      <div class="card-img">${item.e}</div>
+      <div class="card-body">
+        <div class="card-name">${name}</div>
+        <div class="card-desc">${desc}</div>
+        <div class="card-footer">
+          <div class="card-price${changed?' updated':''}">&euro;${price.toFixed(2)}</div>
+          <button class="card-btn">${t.addBtn}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateCardButtons();
+}
+
+function triggerReload() {
+  const isRollback = updated;
+  const ov = document.getElementById('reload-overlay');
+  const bar = document.getElementById('rbar');
+  const terminal = document.getElementById('reload-terminal');
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+  const detectedLang = lang.toUpperCase();
+  const fromVer = updated ? `v1.${ver}` : `v1.${ver}`;
+  const toVer = updated ? `v1.${ver - 1}` : `v1.${ver + 1}`;
+
+  const LINES = isRollback ? [
+    { icon: '✓', cls: 'term-ok',   text: 'Connecting to master script...', val: 'OK' },
+    { icon: '✓', cls: 'term-ok',   text: `Local time synced`, val: timeStr },
+    { icon: '✓', cls: 'term-ok',   text: 'Language context', val: detectedLang },
+    { icon: '✓', cls: 'term-ok',   text: 'force_hour check', val: 'passed' },
+    { icon: '⚠', cls: 'term-warn', text: 'Rollback requested', val: fromVer + ' → ' + toVer },
+    { icon: '✓', cls: 'term-ok',   text: 'Cache invalidated', val: 'Done ✓' },
+  ] : [
+    { icon: '✓', cls: 'term-ok',   text: 'Connecting to master script...', val: 'OK' },
+    { icon: '✓', cls: 'term-ok',   text: 'Local time synced', val: timeStr },
+    { icon: '✓', cls: 'term-ok',   text: 'Language context', val: detectedLang },
+    { icon: '✓', cls: 'term-ok',   text: 'force_hour check', val: 'passed' },
+    { icon: '⚠', cls: 'term-warn', text: 'Stale cache detected on client', val: '' },
+    { icon: '✓', cls: 'term-ok',   text: 'Tab activity confirmed (bfcache bypass)', val: '' },
+    { icon: '✓', cls: 'term-ok',   text: 'Version bump applied', val: fromVer + ' → ' + toVer },
+    { icon: '✓', cls: 'term-ok',   text: 'Cache invalidated', val: 'Done ✓' },
+  ];
+
+  terminal.innerHTML = '';
+  ov.classList.add('active');
+  bar.style.width = '0%';
+
+  // Animate terminal lines
+  const totalDuration = 1800;
+  const lineDelay = totalDuration / LINES.length;
+
+  LINES.forEach((line, i) => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'reload-terminal-line';
+      el.innerHTML = `<span class="${line.cls}">${line.icon}</span><span class="term-text">${line.text}</span>${line.val ? `<span class="term-val">${line.val}</span>` : ''}`;
+      terminal.appendChild(el);
+    }, i * lineDelay);
+  });
+
+  // Progress bar
+  let p = 0;
+  const iv = setInterval(() => {
+    p += 1.5;
+    bar.style.width = Math.min(p, 100) + '%';
+    if (p >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        ov.classList.remove('active');
+        updated = !updated;
+        ver += updated ? 1 : -1;
+        document.getElementById('vtag').textContent = 'v1.' + ver;
+        render(); applyLang();
+        // Flash prices
+        setTimeout(() => {
+          document.querySelectorAll('.card-price').forEach(el => {
+            el.style.transform = 'scale(1.15)';
+            el.style.transition = 'transform 0.2s';
+            setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+          });
+        }, 100);
+        showToast(updated ? T[lang].toast : T[lang].toastRollback);
+      }, 300);
+    }
+  }, 30);
+}
+
+// ── TOUR ──────────────────────────────────────────────────────────────────────
+const TOUR_STEPS = {
+  ru: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: 'Это SENTINEL-бар — статус вашего сайта в реальном времени. Клиент всегда знает что меню актуально.' },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Нажмите сюда чтобы симулировать обновление кэша — цены на карточках изменятся прямо на глазах.' },
+    { target: '#menu-grid',     arrow: 'top',    text: 'Цены обновились — клиент видит актуальное меню. При реальном релоаде он увидит ваш брендированный прелоадер. Забота, а не просто обновление.' },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Мини-панель управления. Один тумблер — и сайт сразу реагирует: блокирует заказы, показывает модал.' },
+    { target: '#block-modal', arrow: 'bottom', text: 'Все тексты модала настраиваются под каждый язык отдельно. Ваш бренд — ваш голос.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Здесь будет ваш CTA. Контакт, ссылка, кнопка — всё настраивается под вас.' },
+  ],
+  en: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: 'This is the SENTINEL bar — your site\'s live status. Customers always know the menu is fresh.' },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Press here to simulate a cache refresh — watch the prices change right before your eyes.' },
+    { target: '#menu-grid',     arrow: 'top',    text: 'Prices are now fresh. In a real reload, the customer sees your branded preloader — not a blank screen. That\'s care, not just a refresh.' },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Your mini control panel. One toggle — the site reacts immediately: blocks orders, shows a modal.' },
+    { target: '#block-modal', arrow: 'bottom', text: 'All modal texts are fully customizable per language. Your brand, your voice.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Your CTA goes here. Contact, link, button — everything configured for you.' },
+  ],
+  es: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: 'Esta es la barra SENTINEL — el estado en vivo de tu web. Los clientes siempre saben que el menú es fresco.' },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Pulsa aquí para simular una actualización de caché — observa cómo cambian los precios.' },
+    { target: '#menu-grid',     arrow: 'top',    text: 'Los precios ya están actualizados. En una recarga real, el cliente ve tu preloader con tu marca — no una pantalla en blanco. Eso es cuidado, no solo una actualización.' },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Tu mini panel de control. Un interruptor — el sitio reacciona de inmediato.' },
+    { target: '#block-modal', arrow: 'bottom', text: 'Todos los textos del modal son personalizables por idioma. Tu marca, tu voz.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Tu CTA va aquí. Contacto, enlace, botón — todo configurado para ti.' },
+  ],
+};
+
+const TOUR_FINISH = { ru: '¡Explorar!', en: "Let's explore!", es: '¡Explorar!' };
+const TOUR_SKIP_T = { ru: 'Пропустить', en: 'Skip tour', es: 'Omitir' };
+const TOUR_STEP_T = { ru: 'Шаг', en: 'Step', es: 'Paso' };
+const TOUR_OF_T   = { ru: 'из', en: 'of', es: 'de' };
+
+let tourStep = 0;
+let tourActive = false;
+
+function startTour() {
+  tourActive = true;
+  tourStep = 0;
+  document.getElementById('tour-backdrop').classList.add('active');
+  showTourStep();
+}
+
+function showTourStep() {
+  const steps = TOUR_STEPS[lang];
+  const step = steps[tourStep];
+  const box = document.getElementById('tour-box');
+  const arrow = document.getElementById('tour-arrow');
+  const hl = document.getElementById('tour-highlight');
+
+  box.classList.remove('active');
+  arrow.classList.remove('active');
+  hl.classList.remove('active');
+
+  // Preloader step — target is inside preloader
+  const isPreloaderStep = !!step.preloader;
+
+  if (!isPreloaderStep) {
+    if (step.target === '#block-modal') {
+      // First apply language, then open modal
+      ['emergency','dayoff','evening-fomo','evening-closed'].forEach(id => {
+        const el = document.getElementById('tog-' + id);
+        if (el) el.checked = false;
+      });
+      blockMode = null;
+      document.getElementById('tog-emergency').checked = true;
+      blockMode = 'emergency';
+      // Update modal content in correct language before showing
+      const t = T[lang];
+      const b = t.block['emergency'];
+      document.getElementById('modal-icon').textContent = b.icon;
+      document.getElementById('modal-title').textContent = b.title;
+      document.getElementById('modal-body').innerHTML = b.body;
+      document.getElementById('modal-close').textContent = t.modalClose;
+      document.getElementById('block-overlay').classList.add('active');
+      updateCardButtons();
+    } else {
+      document.getElementById('block-overlay').classList.remove('active');
+      ['emergency','dayoff','evening-fomo','evening-closed'].forEach(id => {
+        const el = document.getElementById('tog-' + id);
+        if (el) el.checked = false;
+      });
+      blockMode = null;
+      updateCardButtons();
+    }
+  }
+
+  setTimeout(() => {
+    const targetEl = document.querySelector(step.target);
+    if (!targetEl) { nextTourStep(); return; }
+
+    const rect = targetEl.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Highlight
+    hl.style.top    = (rect.top - 4) + 'px';
+    hl.style.left   = (rect.left - 4) + 'px';
+    hl.style.width  = (rect.width + 8) + 'px';
+    hl.style.height = (rect.height + 8) + 'px';
+    hl.classList.add('active');
+
+    // Arrow
+    const arrowSize = 36;
+    let ax, ay;
+    if (step.arrow === 'bottom') {
+      ax = rect.left + rect.width / 2 - arrowSize / 2;
+      ay = rect.bottom + 6;
+      arrow.style.transform = 'rotate(0deg)';
+    } else if (step.arrow === 'top') {
+      ax = rect.left + rect.width / 2 - arrowSize / 2;
+      ay = rect.top - arrowSize - 6;
+      arrow.style.transform = 'rotate(180deg)';
+    } else if (step.arrow === 'left') {
+      ax = rect.right + 6;
+      ay = rect.top + rect.height / 2 - arrowSize / 2;
+      arrow.style.transform = 'rotate(-90deg)';
+    }
+    arrow.style.left = Math.max(8, Math.min(ax, vw - arrowSize - 8)) + 'px';
+    arrow.style.top  = Math.max(8, Math.min(ay, vh - arrowSize - 8)) + 'px';
+    arrow.classList.add('active');
+
+    // Box position
+    const boxW = 270, boxH = 160;
+    let bx, by;
+    if (step.arrow === 'bottom') {
+      bx = rect.left + rect.width / 2 - boxW / 2;
+      by = rect.bottom + arrowSize + 14;
+    } else if (step.arrow === 'top') {
+      bx = rect.left + rect.width / 2 - boxW / 2;
+      by = rect.top - arrowSize - boxH - 14;
+    } else {
+      bx = rect.right + arrowSize + 14;
+      by = rect.top + rect.height / 2 - boxH / 2;
+    }
+    bx = Math.max(12, Math.min(bx, vw - boxW - 12));
+    by = Math.max(12, Math.min(by, vh - boxH - 12));
+    box.style.left = bx + 'px';
+    box.style.top  = by + 'px';
+
+    // Content
+    const total = steps.length;
+    document.getElementById('tour-step-label').textContent =
+      `${TOUR_STEP_T[lang]} ${tourStep + 1} ${TOUR_OF_T[lang]} ${total}`;
+    document.getElementById('tour-text').textContent = step.text;
+    document.getElementById('tour-skip').textContent = TOUR_SKIP_T[lang];
+
+    const isLast = tourStep === total - 1;
+    // On preloader step, Next button says "Choose a language ↓"
+    if (isPreloaderStep) {
+      document.getElementById('tour-next').textContent = '— Choose language ↓';
+      document.getElementById('tour-next').disabled = true;
+      document.getElementById('tour-next').style.opacity = '0.5';
+    } else {
+      document.getElementById('tour-next').disabled = false;
+      document.getElementById('tour-next').style.opacity = '1';
+      document.getElementById('tour-next').textContent = isLast ? "Let's explore! 🕷" : 'Next →';
+    }
+
+    // Dots
+    const dots = document.getElementById('tour-dots');
+    dots.innerHTML = '';
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('div');
+      d.className = 'tour-dot' + (i === tourStep ? ' active' : '');
+      dots.appendChild(d);
+    }
+
+    box.classList.add('active');
+
+    if (!isPreloaderStep) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 150);
+}
+
+function nextTourStep() {
+  const steps = TOUR_STEPS[lang];
+  if (tourStep < steps.length - 1) {
+    tourStep++;
+    showTourStep();
+  } else {
+    endTour();
+  }
+}
+
+function endTour() {
+  tourActive = false;
+  const box = document.getElementById('tour-box');
+  const arrow = document.getElementById('tour-arrow');
+  const hl = document.getElementById('tour-highlight');
+  const bd = document.getElementById('tour-backdrop');
+  box.classList.remove('active');
+  arrow.classList.remove('active');
+  hl.classList.remove('active');
+  bd.classList.remove('active');
+  // Close any open modal
+  document.getElementById('block-overlay').classList.remove('active');
+  ['emergency','dayoff','evening-fomo','evening-closed'].forEach(id => {
+    const el = document.getElementById('tog-' + id);
+    if (el) el.checked = false;
+  });
+  blockMode = null;
+  updateCardButtons();
+}
+
+document.getElementById('tour-next').addEventListener('click', nextTourStep);
+document.getElementById('tour-skip').addEventListener('click', endTour);
+// ──────────────────────────────────────────────────────────────────────────────
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── ACCESS GATE ──────────────────────────────────────────────────────────────
+(function() {
+  const PASS = 'sentinel2026';
+  const gate = document.getElementById('gate');
+  const input = document.getElementById('gate-input');
+  const err = document.getElementById('gate-error');
+
+  if (sessionStorage.getItem('wc_gate_ok') === '1') {
+    gate.classList.add('hidden');
+    return;
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (input.value === PASS) {
+        sessionStorage.setItem('wc_gate_ok', '1');
+        gate.classList.add('hidden');
+      } else {
+        err.textContent = 'Incorrect code';
+        input.value = '';
+        input.style.borderColor = '#ff6b6b';
+        setTimeout(() => { input.style.borderColor = ''; }, 600);
+      }
+    }
+  });
+
+  setTimeout(() => input.focus(), 100);
+})();
+</script>
+</body>
+</html>
