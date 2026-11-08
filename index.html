@@ -18,6 +18,24 @@
     --muted: #7a7a96;
     --accent: #c8ff00;
     --accent-dim: rgba(200,255,0,0.1);
+    --accent-hover: #d4ff1a;
+    --accent-ring: rgba(200,255,0,0.15);
+    --header-bg: rgba(15,15,19,0.96);
+  }
+
+  /* Scenario: beauty salon. Same engine, different personality: only the palette changes here. */
+  :root[data-scenario="salon"] {
+    --bg: #171017;
+    --surface: #231a24;
+    --surface2: #2e2230;
+    --border: rgba(255,214,235,0.10);
+    --text: #fbeff6;
+    --muted: #a58fa3;
+    --accent: #f9a8d4;
+    --accent-dim: rgba(249,168,212,0.12);
+    --accent-hover: #fbc0e0;
+    --accent-ring: rgba(249,168,212,0.18);
+    --header-bg: rgba(23,16,23,0.96);
   }
 
   body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
@@ -107,7 +125,7 @@
   .site-header {
     border-bottom: 1px solid var(--border); padding: 0 24px;
     display: flex; align-items: center; justify-content: space-between; height: 58px;
-    position: sticky; top: 0; background: rgba(15,15,19,0.96); z-index: 100;
+    position: sticky; top: 0; background: var(--header-bg); z-index: 100;
   }
 
   .site-logo { font-family: 'Manrope', 'Inter', sans-serif; font-size: 18px; font-weight: 800; }
@@ -152,7 +170,7 @@
     padding: 7px 15px; border-radius: 6px; cursor: pointer;
     letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.15s;
   }
-  .reload-btn:hover { background: #d4ff1a; transform: translateY(-1px); }
+  .reload-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
   .reload-btn:active { transform: scale(0.97); }
 
   /* HERO */
@@ -251,7 +269,7 @@
     background: var(--surface); border: 1px solid var(--accent);
     border-radius: 10px; padding: 16px 18px; max-width: 260px;
     pointer-events: none;
-    box-shadow: 0 0 0 1px rgba(200,255,0,0.15), 0 8px 32px rgba(0,0,0,0.5);
+    box-shadow: 0 0 0 1px var(--accent-ring), 0 8px 32px rgba(0,0,0,0.5);
     opacity: 0; transform: translateY(6px);
     transition: opacity 0.25s, transform 0.25s;
   }
@@ -283,7 +301,7 @@
     padding: 6px 14px; border-radius: 5px; cursor: pointer;
     letter-spacing: 0.04em; transition: background 0.15s; white-space: nowrap;
   }
-  .tour-next:hover { background: #d4ff1a; }
+  .tour-next:hover { background: var(--accent-hover); }
 
   .tour-skip {
     background: none; border: none; color: var(--muted);
@@ -299,6 +317,7 @@
     opacity: 0; transition: opacity 0.25s;
   }
   .tour-arrow.active { opacity: 1; }
+  .tour-arrow { color: var(--accent); }
   .tour-arrow svg { width: 36px; height: 36px; }
 
   @keyframes arrowPulse {
@@ -310,7 +329,7 @@
   /* Highlight ring */
   .tour-highlight {
     position: fixed; z-index: 49999; border-radius: 8px;
-    box-shadow: 0 0 0 3px var(--accent), 0 0 0 6px rgba(200,255,0,0.15);
+    box-shadow: 0 0 0 3px var(--accent), 0 0 0 6px var(--accent-ring);
     pointer-events: none;
     opacity: 0; transition: opacity 0.25s;
   }
@@ -426,6 +445,20 @@
   }
   .gate-hint { font-size: 12px; color: var(--muted); max-width: 260px; text-align: center; line-height: 1.5; }
 
+  /* SCENARIO BAR */
+  .scenario-bar {
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 8px;
+    padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--bg);
+    font-size: 11px; color: var(--muted);
+  }
+  .scenario-bar button {
+    background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    padding: 5px 11px; border-radius: 999px; transition: all 0.15s;
+  }
+  .scenario-bar button:hover { border-color: var(--accent); color: var(--accent); }
+  .scenario-bar button.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
   /* MOBILE */
   @media (max-width: 600px) {
     .site-header { padding: 0 16px; }
@@ -510,13 +543,19 @@
 
 <div id="site">
   <header class="site-header">
-    <div class="site-logo">Eat<span>Well</span></div>
+    <div class="site-logo" id="site-logo">Eat<span>Well</span></div>
     <div class="lang-switch">
       <button onclick="switchLang('ru')" id="btn-ru">RU</button>
       <button onclick="switchLang('en')" id="btn-en">EN</button>
       <button onclick="switchLang('es')" id="btn-es">ES</button>
     </div>
   </header>
+  <div class="scenario-bar" id="scenario-bar">
+    <span id="scn-label">Демо:</span>
+    <button id="scn-food" onclick="switchScenario('food')">🍣 <span id="scn-food-t">Ресторан</span></button>
+    <button id="scn-salon" onclick="switchScenario('salon')">💅 <span id="scn-salon-t">Салон</span></button>
+    <button id="scn-tour" onclick="replayTour()">▶ <span id="scn-tour-t">Тур</span></button>
+  </div>
 
   <!-- FOMO BANNER -->
   <div id="fomo-banner">
@@ -566,7 +605,7 @@
   <div class="tour-highlight" id="tour-highlight"></div>
   <div class="tour-arrow" id="tour-arrow">
     <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M18 6 L18 26 M10 18 L18 28 L26 18" stroke="#c8ff00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M18 6 L18 26 M10 18 L18 28 L26 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </div>
   <div class="tour-box" id="tour-box">
@@ -613,6 +652,7 @@ const T = {
     statusAfter: 'Обновлено только что · версия изменилась',
     rbtnHint: 'Нажмите — увидите как клиент получает новую версию',
     rbtnHintAfter: 'Нажмите — откатите к старым ценам',
+    rbtn: '↻ Симулировать обновление',
     rbtnAfter: '↺ Откатить версию',
     heroTitle: 'Свежее меню · Каждый день',
     heroSub: 'Клиент говорит "у меня на телефоне другая цена"? SENTINEL сбрасывает версию кэша на стороне клиента — и спора больше нет.',
@@ -656,6 +696,7 @@ const T = {
     statusAfter: 'Just updated · version changed',
     rbtnHint: 'Press — see how the customer gets the new version',
     rbtnHintAfter: 'Press — roll back to old prices',
+    rbtn: '↻ Simulate update',
     rbtnAfter: '↺ Roll back version',
     heroTitle: 'Fresh menu · Every day',
     heroSub: 'Customer insisting they have a different price on their phone? SENTINEL resets the cache version on their side — no more arguments.',
@@ -699,6 +740,7 @@ const T = {
     statusAfter: 'Recién actualizado · versión cambiada',
     rbtnHint: 'Pulsa — ve cómo el cliente recibe la nueva versión',
     rbtnHintAfter: 'Pulsa — vuelve a los precios anteriores',
+    rbtn: '↻ Simular actualización',
     rbtnAfter: '↺ Revertir versión',
     heroTitle: 'Menú fresco · Cada día',
     heroSub: '¿El cliente insiste en que tiene otro precio en su teléfono? SENTINEL resetea la versión del caché en su dispositivo — sin más discusiones.',
@@ -747,6 +789,162 @@ const MENU = [
 
 let lang = 'ru', ver = 1, updated = false;
 
+// ── SCENARIO: beauty salon ────────────────────────────────────────────────────
+// Only content differs from the restaurant demo: texts, services, tour copy and palette (CSS above).
+let scenario = 'food';
+
+const SCN_UI = {
+  ru: { label: 'Демо:', food: 'Ресторан', salon: 'Салон', tour: 'Тур' },
+  en: { label: 'Demo:', food: 'Restaurant', salon: 'Salon', tour: 'Tour' },
+  es: { label: 'Demo:', food: 'Restaurante', salon: 'Salón', tour: 'Tour' },
+};
+
+const SALON_BRAND = { food: 'Eat<span>Well</span>', salon: 'Bloom<span>Studio</span>' };
+
+const MENU_SALON = [
+  { e:'💅', ru:['Маникюр с покрытием','Гель-лак, уход за кутикулой'], en:['Manicure with gel polish','Gel polish, cuticle care'], es:['Manicura semipermanente','Esmalte semipermanente, cuidado de cutículas'], p:25, p2:28 },
+  { e:'✂️', ru:['Стрижка и укладка','Консультация, стрижка, укладка'], en:['Haircut & styling','Consultation, cut, blow-dry'], es:['Corte y peinado','Consulta, corte y secado'], p:40, p2:42 },
+  { e:'🎨', ru:['Окрашивание','Тонирование или полное, подбор оттенка'], en:['Hair colouring','Toning or full colour, shade match'], es:['Coloración','Tinte o color completo, elección de tono'], p:80, p2:85 },
+  { e:'💆‍♀️', ru:['Уход за лицом','Чистка, маска, массаж'], en:['Facial treatment','Cleansing, mask, massage'], es:['Tratamiento facial','Limpieza, mascarilla, masaje'], p:55, p2:50 },
+  { e:'👁️', ru:['Ламинирование ресниц','Подъём, окрашивание, уход'], en:['Lash lift','Lift, tint, care'], es:['Lifting de pestañas','Lifting, tinte, cuidado'], p:35, p2:35 },
+  { e:'🌸', ru:['Spa-уход для рук','Пилинг, парафин, массаж'], en:['Hand spa','Scrub, paraffin, massage'], es:['Spa de manos','Exfoliación, parafina, masaje'], p:30, p2:32 },
+];
+
+// Overrides on top of T[lang]; anything not listed here falls back to the restaurant text.
+const T_SALON = {
+  ru: {
+    reloadText: 'Обновляем расписание...',
+    status: 'Расписание актуально · обновлено сегодня',
+    rbtnHint: 'Нажмите — увидите как клиентка получает новую версию',
+    heroTitle: 'Свежее расписание · Каждый день',
+    heroSub: 'Клиентка видит вчерашние цены или окно записи, которого уже нет? SENTINEL сбрасывает версию кэша на её стороне — и недоразумений нет.',
+    stripDesc: 'SENTINEL Core — скрипт, который кладётся поверх любого сайта. Tilda, WordPress, Wix — без разницы. Клиентки всегда видят актуальные цены, часы и окно записи.',
+    addBtn: 'Записаться',
+    toast: '✓ Расписание обновлено — цены актуальны',
+    block: {
+      emergency: { icon: '🌸', title: 'Мастер в отпуске', body: 'Мы отдыхаем и вернёмся в <strong>понедельник</strong>, красавица!<br>Срочный вопрос — напишите нам в WhatsApp.' },
+      dayoff:    { icon: '💆‍♀️', title: 'Сегодня выходной', body: 'Салон отдыхает. Запись открыта по будням — до <strong>20:00</strong>.<br>Срочный вопрос — напишите нам в WhatsApp.' },
+      evening:   { icon: '🌙', title: 'Приём заявок закрыт', body: 'Заявки принимаются до <strong>20:00</strong>.<br>Напишите нам в WhatsApp — ответим завтра в <strong>10:00</strong>.' },
+    },
+    fomo: 'Приём заявок на сегодня закрывается через',
+    fomoUrgent: 'Последний шанс записаться!',
+    admEmergency: '🌸 Мастер в отпуске',
+    admDayoff: '📅 Выходной день',
+    admEveningFomo: '🌙 Вечер — скоро закрытие заявок',
+    admEveningClosed: '🔒 Заявки закрыты на ночь',
+  },
+  en: {
+    reloadText: 'Updating schedule...',
+    status: 'Schedule is fresh · updated today',
+    rbtnHint: 'Press — see how the client gets the new version',
+    heroTitle: 'Fresh schedule · Every day',
+    heroSub: "Client sees yesterday's prices or a booking window that has already closed? SENTINEL resets the cache version on her side — no misunderstandings.",
+    stripDesc: "SENTINEL Core — a script that sits on top of any website. Tilda, WordPress, Wix — doesn't matter. Clients always see current prices, hours and booking window.",
+    addBtn: 'Book',
+    toast: '✓ Schedule updated — prices are current',
+    block: {
+      emergency: { icon: '🌸', title: 'Master on vacation', body: "We're away and will be back on <strong>Monday</strong>, beautiful!<br>Urgent question? Message us on WhatsApp." },
+      dayoff:    { icon: '💆‍♀️', title: 'Day off today', body: 'The salon is resting. Requests are open on weekdays until <strong>20:00</strong>.<br>Urgent question? Message us on WhatsApp.' },
+      evening:   { icon: '🌙', title: 'Requests are closed', body: "We accept requests until <strong>20:00</strong>.<br>Message us on WhatsApp — we'll reply tomorrow at <strong>10:00</strong>." },
+    },
+    fomo: 'Requests for today close in',
+    fomoUrgent: 'Last chance to book!',
+    admEmergency: '🌸 Master on vacation',
+    admDayoff: '📅 Day off',
+    admEveningFomo: '🌙 Evening — requests closing soon',
+    admEveningClosed: '🔒 Requests closed for the night',
+  },
+  es: {
+    reloadText: 'Actualizando horarios...',
+    status: 'Horarios al día · actualizado hoy',
+    rbtnHint: 'Pulsa — ve cómo la clienta recibe la nueva versión',
+    heroTitle: 'Agenda fresca · Cada día',
+    heroSub: '¿La clienta ve los precios de ayer o una ventana de reserva que ya no existe? SENTINEL restablece la versión de caché de su lado — sin malentendidos.',
+    stripDesc: 'SENTINEL Core — un script que se coloca encima de cualquier web. Tilda, WordPress, Wix — no importa. Las clientas siempre ven precios, horarios y ventana de reserva actuales.',
+    addBtn: 'Reservar',
+    toast: '✓ Agenda actualizada — precios al día',
+    block: {
+      emergency: { icon: '🌸', title: 'Maestra de vacaciones', body: 'Estamos de descanso y volvemos el <strong>lunes</strong>, guapa.<br>¿Algo urgente? Escríbenos por WhatsApp.' },
+      dayoff:    { icon: '💆‍♀️', title: 'Hoy descansamos', body: 'El salón descansa. Aceptamos solicitudes entre semana hasta las <strong>20:00</strong>.<br>¿Algo urgente? Escríbenos por WhatsApp.' },
+      evening:   { icon: '🌙', title: 'Solicitudes cerradas', body: 'Aceptamos solicitudes hasta las <strong>20:00</strong>.<br>Escríbenos por WhatsApp — respondemos mañana a las <strong>10:00</strong>.' },
+    },
+    fomo: 'Las solicitudes de hoy se cierran en',
+    fomoUrgent: '¡Última oportunidad para reservar!',
+    admEmergency: '🌸 Maestra de vacaciones',
+    admDayoff: '📅 Día libre',
+    admEveningFomo: '🌙 Tarde — cierre de solicitudes',
+    admEveningClosed: '🔒 Solicitudes cerradas por la noche',
+  },
+};
+
+const TOUR_STEPS_SALON = {
+  ru: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: 'Это SENTINEL-бар — статус вашего сайта в реальном времени. Клиентка всегда знает, что цены и окно записи актуальны.' },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Нажмите сюда, чтобы симулировать обновление кэша — цены на карточках услуг изменятся прямо на глазах.' },
+    { target: '#menu-grid',     arrow: 'top',    text: 'Цены обновились — клиентка видит актуальный прайс. При реальном обновлении она увидит ваш брендированный прелоадер. Забота, а не просто обновление.' },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Мини-панель управления. Один тумблер — и сайт сразу реагирует: мастер в отпуске, выходной, приём заявок закрыт.' },
+    { target: '#block-modal',   arrow: 'bottom', text: 'Тексты модала настраиваются под каждый язык: когда вернёмся, до какого часа принимаем заявки, куда написать срочно. Ваш бренд — ваш голос.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Здесь будет ваш CTA. Контакт, ссылка, кнопка — всё настраивается под вас.' },
+  ],
+  en: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: "This is the SENTINEL bar — your site's live status. Clients always know prices and the booking window are current." },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Press here to simulate a cache refresh — watch the service prices change right before your eyes.' },
+    { target: '#menu-grid',     arrow: 'top',    text: "Prices are now fresh. In a real reload, the client sees your branded preloader — not a blank screen. That's care, not just a refresh." },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Your mini control panel. One toggle — the site reacts immediately: master on vacation, day off, requests closed.' },
+    { target: '#block-modal',   arrow: 'bottom', text: 'Modal texts are customizable per language: when we are back, until what time we take requests, where to write if it is urgent. Your brand, your voice.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Your CTA goes here. Contact, link, button — everything configured for you.' },
+  ],
+  es: [
+    { target: '#sentinel-bar',  arrow: 'bottom', text: 'Esta es la barra SENTINEL — el estado en vivo de tu web. Las clientas siempre saben que los precios y la ventana de reserva están al día.' },
+    { target: '#rbtn',          arrow: 'bottom', text: 'Pulsa aquí para simular una actualización de caché — observa cómo cambian los precios de los servicios.' },
+    { target: '#menu-grid',     arrow: 'top',    text: 'Los precios ya están actualizados. En una recarga real, la clienta ve tu preloader con tu marca — no una pantalla en blanco. Eso es cuidado, no solo una actualización.' },
+    { target: '#admin-panel',   arrow: 'left',   text: 'Tu mini panel de control. Un interruptor — el sitio reacciona de inmediato: maestra de vacaciones, día libre, solicitudes cerradas.' },
+    { target: '#block-modal',   arrow: 'bottom', text: 'Los textos del modal se personalizan por idioma: cuándo volvemos, hasta qué hora aceptamos solicitudes, dónde escribir si es urgente. Tu marca, tu voz.' },
+    { target: '.wc-strip',      arrow: 'top',    text: 'Tu CTA va aquí. Contacto, enlace, botón — todo configurado para ti.' },
+  ],
+};
+
+// Content getters: everything that used to read T[lang] / MENU / TOUR_STEPS[lang] goes through these.
+function getT() {
+  const base = T[lang];
+  if (scenario !== 'salon') return base;
+  const o = T_SALON[lang];
+  return Object.assign({}, base, o, { block: Object.assign({}, base.block, o.block) });
+}
+function getMenu() { return scenario === 'salon' ? MENU_SALON : MENU; }
+function getTourSteps() { return (scenario === 'salon' ? TOUR_STEPS_SALON : TOUR_STEPS)[lang]; }
+
+function applyScenarioUI() {
+  const u = SCN_UI[lang];
+  document.documentElement.dataset.scenario = scenario;
+  document.getElementById('site-logo').innerHTML = SALON_BRAND[scenario];
+  document.getElementById('scn-label').textContent = u.label;
+  document.getElementById('scn-food-t').textContent = u.food;
+  document.getElementById('scn-salon-t').textContent = u.salon;
+  document.getElementById('scn-tour-t').textContent = u.tour;
+  document.getElementById('scn-food').classList.toggle('active', scenario === 'food');
+  document.getElementById('scn-salon').classList.toggle('active', scenario === 'salon');
+}
+
+function switchScenario(next) {
+  if (next === scenario || tourActive) return;
+  scenario = next;
+  // fresh state for the new scenario: no open modal, no active block mode, version 1
+  TOGGLES.forEach(id => { const el = document.getElementById('tog-' + id); if (el) el.checked = false; });
+  blockMode = null;
+  updated = false; ver = 1;
+  document.getElementById('vtag').textContent = 'v1.' + ver;
+  document.getElementById('block-overlay').classList.remove('active');
+  updateFomoBanner();
+  render(); applyLang();
+  window.scrollTo({ top: 0 });
+}
+
+function replayTour() {
+  if (!tourActive) startTour();
+}
+
+
 const WELCOME = {
   ru: {
     title: 'Мультиязычность из коробки',
@@ -794,7 +992,8 @@ function switchLang(l) {
 }
 
 function applyLang() {
-  const t = T[lang];
+  applyScenarioUI();
+  const t = getT();
   ['ru','en','es'].forEach(x => document.getElementById('btn-'+x).classList.toggle('active', x===lang));
   document.getElementById('sstatus').textContent = updated ? t.statusAfter : t.status;
   document.getElementById('rbtn').textContent = updated ? t.rbtnAfter : t.rbtn;
@@ -862,7 +1061,7 @@ function updateBlockModal() {
     document.getElementById('block-overlay').classList.remove('active');
     return;
   }
-  const t = T[lang];
+  const t = getT();
   const key = blockMode === 'evening-closed' ? 'evening' : blockMode;
   const b = t.block[key];
   document.getElementById('modal-icon').textContent = b.icon;
@@ -874,7 +1073,7 @@ function updateBlockModal() {
 
 function updateFomoBanner() {
   const banner = document.getElementById('fomo-banner');
-  const t = T[lang];
+  const t = getT();
   if (blockMode === 'evening-fomo') {
     banner.classList.add('active');
     document.getElementById('fomo-text').textContent = t.fomo;
@@ -901,7 +1100,7 @@ function startFomoTimer() {
     const banner = document.getElementById('fomo-banner');
     if (fomoSeconds < 15 * 60) {
       banner.classList.add('urgent');
-      document.getElementById('fomo-text').textContent = T[lang].fomoUrgent;
+      document.getElementById('fomo-text').textContent = getT().fomoUrgent;
     }
   }, 1000);
 }
@@ -919,9 +1118,9 @@ document.getElementById('block-overlay').addEventListener('click', (e) => {
 });
 
 function render() {
-  const t = T[lang];
+  const t = getT();
   const grid = document.getElementById('menu-grid');
-  grid.innerHTML = MENU.map(item => {
+  grid.innerHTML = getMenu().map(item => {
     const [name, desc] = item[lang];
     const price = updated ? item.p2 : item.p;
     const changed = updated;
@@ -1008,7 +1207,7 @@ function triggerReload() {
             setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
           });
         }, 100);
-        showToast(updated ? T[lang].toast : T[lang].toastRollback);
+        showToast(updated ? getT().toast : getT().toastRollback);
       }, 300);
     }
   }, 30);
@@ -1059,7 +1258,7 @@ function startTour() {
 }
 
 function showTourStep() {
-  const steps = TOUR_STEPS[lang];
+  const steps = getTourSteps();
   const step = steps[tourStep];
   const box = document.getElementById('tour-box');
   const arrow = document.getElementById('tour-arrow');
@@ -1083,7 +1282,7 @@ function showTourStep() {
       document.getElementById('tog-emergency').checked = true;
       blockMode = 'emergency';
       // Update modal content in correct language before showing
-      const t = T[lang];
+      const t = getT();
       const b = t.block['emergency'];
       document.getElementById('modal-icon').textContent = b.icon;
       document.getElementById('modal-title').textContent = b.title;
@@ -1184,12 +1383,30 @@ function showTourStep() {
       }
     }
 
+    // Tall target on a short screen: if the box does not fit on its side, try the other side;
+    // if it fits nowhere, skip the arrow instead of drawing it on top of the text.
+    let showArrow = true;
+    if (arrowRotation === 'rotate(0deg)' || arrowRotation === 'rotate(180deg)') {
+      const fits = (y) => y >= 12 && y + boxH <= vh - 12;
+      if (!fits(by)) {
+        const below = arrowRotation === 'rotate(0deg)';
+        const altBy = below ? rect.top - arrowSize - boxH - 14 : rect.bottom + arrowSize + 14;
+        if (fits(altBy)) {
+          by = altBy;
+          ay = below ? rect.top - arrowSize - 6 : rect.bottom + 6;
+          arrowRotation = below ? 'rotate(180deg)' : 'rotate(0deg)';
+        } else {
+          showArrow = false;
+        }
+      }
+    }
+
     ax = Math.max(8, Math.min(ax, vw - arrowSize - 8));
     ay = Math.max(8, Math.min(ay, vh - arrowSize - 8));
     arrow.style.left = ax + 'px';
     arrow.style.top  = ay + 'px';
     arrow.style.transform = arrowRotation;
-    arrow.classList.add('active');
+    if (showArrow) arrow.classList.add('active');
 
     bx = Math.max(12, Math.min(bx, vw - boxW - 12));
     by = Math.max(12, Math.min(by, vh - boxH - 12));
@@ -1226,7 +1443,7 @@ function showTourStep() {
 }
 
 function nextTourStep() {
-  const steps = TOUR_STEPS[lang];
+  const steps = getTourSteps();
   if (tourStep < steps.length - 1) {
     tourStep++;
     showTourStep();
