@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EatWell — WebCare SENTINEL Demo</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,7 +37,7 @@
   }
 
   #pre-headline {
-    font-family: 'Syne', sans-serif; font-size: clamp(20px, 6vw, 38px); font-weight: 800;
+    font-family: 'Manrope', 'Inter', sans-serif; font-size: clamp(20px, 6vw, 38px); font-weight: 800;
     text-align: center; line-height: 1.2;
   }
   #pre-headline span { color: var(--accent); font-size: 0.7em; display: block; }
@@ -65,7 +65,7 @@
   #reload-overlay.active { display: flex; }
 
   .reload-logo {
-    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+    font-family: 'Manrope', 'Inter', sans-serif; font-size: 22px; font-weight: 800;
     color: var(--text); letter-spacing: 0.02em; margin-bottom: 32px;
   }
   .reload-logo span { color: var(--accent); }
@@ -110,7 +110,7 @@
     position: sticky; top: 0; background: rgba(15,15,19,0.96); z-index: 100;
   }
 
-  .site-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .site-logo { font-family: 'Manrope', 'Inter', sans-serif; font-size: 18px; font-weight: 800; }
   .site-logo span { color: var(--accent); }
 
   .lang-switch { display: flex; gap: 3px; }
@@ -157,7 +157,7 @@
 
   /* HERO */
   .hero { padding: 44px 24px 28px; text-align: center; }
-  .hero h2 { font-family: 'Syne', sans-serif; font-size: clamp(20px, 3vw, 32px); font-weight: 800; margin-bottom: 8px; }
+  .hero h2 { font-family: 'Manrope', 'Inter', sans-serif; font-size: clamp(20px, 3vw, 32px); font-weight: 800; margin-bottom: 8px; }
   .hero p { font-size: 14px; color: var(--muted); }
 
   /* MENU GRID */
@@ -183,7 +183,7 @@
   .card-footer { display: flex; align-items: center; justify-content: space-between; }
 
   .card-price {
-    font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 700;
+    font-family: 'Manrope', 'Inter', sans-serif; font-size: 19px; font-weight: 700;
     transition: color 0.5s;
   }
   .card-price.updated { color: var(--accent); }
@@ -203,7 +203,7 @@
     display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
   }
 
-  .wc-strip h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 5px; }
+  .wc-strip h3 { font-family: 'Manrope', 'Inter', sans-serif; font-size: 17px; font-weight: 800; margin-bottom: 5px; }
   .wc-strip h3 span { color: var(--accent); }
   .wc-strip p { font-size: 13px; color: var(--muted); max-width: 420px; line-height: 1.55; }
 
@@ -390,7 +390,7 @@
   }
 
   .modal-icon { font-size: 36px; margin-bottom: 16px; }
-  .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .modal-title { font-family: 'Manrope', 'Inter', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 10px; }
   .modal-body { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
   .modal-body strong { color: var(--text); }
 
@@ -408,7 +408,7 @@
     font-family: 'Inter', sans-serif;
   }
   #gate.hidden { display: none; }
-  .gate-brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
+  .gate-brand { font-family: 'Manrope', 'Inter', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); }
   .gate-brand span { color: var(--accent); }
   .gate-sub { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 8px; }
   #gate input {
@@ -419,6 +419,39 @@
   }
   #gate input:focus { outline: none; border-color: var(--accent); }
   #gate-error { font-size: 12px; color: #ff6b6b; height: 16px; }
+  #gate-btn {
+    background: var(--accent); color: #000; border: none; border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 11px 40px; cursor: pointer;
+  }
+  .gate-hint { font-size: 12px; color: var(--muted); max-width: 260px; text-align: center; line-height: 1.5; }
+
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .site-header { padding: 0 16px; }
+    /* status line and the refresh button were squeezed into one row; stack them */
+    .sentinel-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 16px; }
+    .sbar-right { justify-content: space-between; gap: 12px; }
+    .sbar-right > div { align-items: flex-end; text-align: right; }
+    .reload-btn { flex-shrink: 0; white-space: nowrap; }
+    .hero { padding: 28px 16px 20px; }
+    .hero h2 { font-size: 22px; }
+    .menu-grid { padding: 0 16px 28px; }
+    .wc-strip { margin-left: 16px; margin-right: 16px; padding: 20px; }
+    /* admin panel: full-width compact 2x2 sheet instead of a 220px box floating over the cards */
+    #admin-panel {
+      left: 10px; right: 10px; bottom: 10px; min-width: 0; padding: 10px 12px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+    }
+    #admin-panel .admin-title { grid-column: 1 / -1; margin-bottom: 0; }
+    #admin-panel .admin-row { margin-bottom: 0; gap: 8px; }
+    #admin-panel .admin-label { font-size: 11px; line-height: 1.3; }
+    /* room under the content so the fixed panel never hides the CTA strip / footer */
+    .site-footer { padding-bottom: 190px; }
+    #toast { bottom: 180px; max-width: calc(100vw - 24px); white-space: normal; text-align: center; opacity: 0; pointer-events: none; transition: transform 0.3s ease, opacity 0.3s ease; }
+    #toast.show { opacity: 1; }
+    .modal-title { font-size: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -426,8 +459,12 @@
 <div id="gate">
   <div class="gate-brand">Web<span>Care</span></div>
   <div class="gate-sub">SENTINEL DEMO · ACCESS RESTRICTED</div>
-  <input type="password" id="gate-input" placeholder="Enter access code" autocomplete="off">
+  <form id="gate-form" autocomplete="off" style="display:flex;flex-direction:column;align-items:center;gap:18px;">
+    <input type="password" id="gate-input" placeholder="Enter access code" autocomplete="off" enterkeyhint="go">
+    <button type="submit" id="gate-btn">Enter</button>
+  </form>
   <div id="gate-error"></div>
+  <div class="gate-hint">The access code was sent to you together with the link.</div>
 </div>
 
 <div id="preloader">
@@ -446,7 +483,7 @@
 <div id="welcome-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:99998;display:none;align-items:center;justify-content:center;padding:24px;">
   <div style="background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:32px 28px;max-width:360px;width:100%;text-align:center;">
     <div style="font-size:32px;margin-bottom:16px;">🕷</div>
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;" id="welcome-title">Multilingual out of the box</div>
+    <div style="font-family:'Manrope','Inter',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;" id="welcome-title">Multilingual out of the box</div>
     <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px;" id="welcome-body">This is a multilingual system. Languages are easily customizable for your audience.<br><br>Now let's show you how WebCare works on a real shop example.</div>
     <button onclick="closeWelcome()" style="background:var(--accent);color:#000;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;padding:11px 28px;border-radius:8px;cursor:pointer;letter-spacing:0.04em;" id="welcome-btn">Let's go →</button>
   </div>
@@ -490,7 +527,7 @@
     <span class="fomo-timer" id="fomo-timer">00:45:00</span>
   </div>
 
-  <div class="sentinel-bar">
+  <div class="sentinel-bar" id="sentinel-bar">
     <div class="sbar-left">
       <div class="sdot"></div>
       <span class="slabel">SENTINEL</span>
@@ -1005,7 +1042,8 @@ const TOUR_STEPS = {
   ],
 };
 
-const TOUR_FINISH = { ru: '¡Explorar!', en: "Let's explore!", es: '¡Explorar!' };
+const TOUR_FINISH = { ru: 'Поехали! 🕷', en: "Let's explore! 🕷", es: '¡Explorar! 🕷' };
+const TOUR_NEXT_T = { ru: 'Далее →', en: 'Next →', es: 'Siguiente →' };
 const TOUR_SKIP_T = { ru: 'Пропустить', en: 'Skip tour', es: 'Omitir' };
 const TOUR_STEP_T = { ru: 'Шаг', en: 'Step', es: 'Paso' };
 const TOUR_OF_T   = { ru: 'из', en: 'of', es: 'de' };
@@ -1068,9 +1106,25 @@ function showTourStep() {
     const targetEl = document.querySelector(step.target);
     if (!targetEl) { nextTourStep(); return; }
 
-    const rect = targetEl.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+
+    // Scroll first (instantly), measure after: the old code measured the target
+    // before a smooth scroll moved it, so the ring ended up in the wrong place.
+    if (!isPreloaderStep) targetEl.scrollIntoView({ block: 'center' });
+    let hlEl = targetEl;
+    // A target taller than most of the screen (the whole menu grid on a phone):
+    // ring its first child instead of an off-screen rectangle.
+    if (!isPreloaderStep && targetEl.getBoundingClientRect().height > vh * 0.6 && targetEl.firstElementChild) {
+      hlEl = targetEl.firstElementChild;
+      hlEl.scrollIntoView({ block: 'center' });
+    }
+    const rect = hlEl.getBoundingClientRect();
+
+    // Fill the text first so the box can be measured at its real size
+    document.getElementById('tour-step-label').textContent =
+      `${TOUR_STEP_T[lang]} ${tourStep + 1} ${TOUR_OF_T[lang]} ${steps.length}`;
+    document.getElementById('tour-text').textContent = step.text;
 
     // Highlight
     hl.style.top    = (rect.top - 4) + 'px';
@@ -1081,13 +1135,13 @@ function showTourStep() {
 
     // Arrow + Box position (with edge-aware flipping)
     const arrowSize = 36;
-    const boxW = 270, boxH = 160;
+    const boxW = box.offsetWidth || 270, boxH = box.offsetHeight || 160;
     let ax, ay, bx, by, arrowRotation;
 
     if (step.arrow === 'bottom') {
       ax = rect.left + rect.width / 2 - arrowSize / 2;
       ay = rect.bottom + 6;
-      arrowRotation = 'rotate(0deg)';
+      arrowRotation = 'rotate(0deg)'; // arrows point from the target towards the explanation box (by design)
       bx = rect.left + rect.width / 2 - boxW / 2;
       by = rect.bottom + arrowSize + 14;
     } else if (step.arrow === 'top') {
@@ -1107,13 +1161,26 @@ function showTourStep() {
         arrowRotation = 'rotate(-90deg)';
         bx = rect.right + arrowSize + 14;
         by = rect.top + rect.height / 2 - boxH / 2;
-      } else {
-        // Flip: arrow points right (toward target), box sits to the left
+      } else if (rect.left >= needed) {
+        // Flip: box sits to the left of the target
         ax = rect.left - arrowSize - 6;
         ay = rect.top + rect.height / 2 - arrowSize / 2;
         arrowRotation = 'rotate(90deg)';
         bx = rect.left - arrowSize - boxW - 14;
         by = rect.top + rect.height / 2 - boxH / 2;
+      } else {
+        // No room at either side (phone, full-width panel): box goes above, or below if there is no room above
+        ax = rect.left + rect.width / 2 - arrowSize / 2;
+        bx = rect.left + rect.width / 2 - boxW / 2;
+        if (rect.top >= arrowSize + boxH + 30) {
+          ay = rect.top - arrowSize - 6;
+          arrowRotation = 'rotate(180deg)';
+          by = rect.top - arrowSize - boxH - 14;
+        } else {
+          ay = rect.bottom + 6;
+          arrowRotation = 'rotate(0deg)';
+          by = rect.bottom + arrowSize + 14;
+        }
       }
     }
 
@@ -1129,11 +1196,8 @@ function showTourStep() {
     box.style.left = bx + 'px';
     box.style.top  = by + 'px';
 
-    // Content
+    // Content (label and text are already set above)
     const total = steps.length;
-    document.getElementById('tour-step-label').textContent =
-      `${TOUR_STEP_T[lang]} ${tourStep + 1} ${TOUR_OF_T[lang]} ${total}`;
-    document.getElementById('tour-text').textContent = step.text;
     document.getElementById('tour-skip').textContent = TOUR_SKIP_T[lang];
 
     const isLast = tourStep === total - 1;
@@ -1145,7 +1209,7 @@ function showTourStep() {
     } else {
       document.getElementById('tour-next').disabled = false;
       document.getElementById('tour-next').style.opacity = '1';
-      document.getElementById('tour-next').textContent = isLast ? "Let's explore! 🕷" : 'Next →';
+      document.getElementById('tour-next').textContent = isLast ? TOUR_FINISH[lang] : TOUR_NEXT_T[lang];
     }
 
     // Dots
@@ -1158,10 +1222,6 @@ function showTourStep() {
     }
 
     box.classList.add('active');
-
-    if (!isPreloaderStep) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
   }, 150);
 }
 
@@ -1218,17 +1278,17 @@ function showToast(msg) {
     return;
   }
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      if (input.value === PASS) {
-        sessionStorage.setItem('wc_gate_ok', '1');
-        gate.classList.add('hidden');
-      } else {
-        err.textContent = 'Incorrect code';
-        input.value = '';
-        input.style.borderColor = '#ff6b6b';
-        setTimeout(() => { input.style.borderColor = ''; }, 600);
-      }
+  // A real <form> submit fires for Enter, the mobile "Go" key and the button alike.
+  document.getElementById('gate-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value.trim() === PASS) {
+      try { sessionStorage.setItem('wc_gate_ok', '1'); } catch (_) {}
+      gate.classList.add('hidden');
+    } else {
+      err.textContent = 'Incorrect code';
+      input.value = '';
+      input.style.borderColor = '#ff6b6b';
+      setTimeout(() => { input.style.borderColor = ''; }, 600);
     }
   });
 
