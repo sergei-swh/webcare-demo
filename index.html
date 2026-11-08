@@ -73,6 +73,30 @@
 
   .pre-note { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
 
+  /* STEP 0 / STEP 1 inside the preloader */
+  .pre-step { display: flex; flex-direction: column; align-items: center; gap: 44px; }
+  .pre-step-label {
+    font-size: 11px; letter-spacing: 0.12em; color: var(--accent);
+    text-transform: uppercase; text-align: center;
+  }
+  .scn-picker { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .scn-card {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'Inter', sans-serif; cursor: pointer; border-radius: 12px;
+    padding: 20px 24px; width: 230px; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  }
+  .scn-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .scn-card .scn-ico { font-size: 34px; }
+  .scn-card .scn-name { font-family: 'Manrope', 'Inter', sans-serif; font-weight: 800; font-size: 18px; }
+  .scn-card .scn-sub { font-size: 12px; color: var(--muted); }
+  .scn-card .scn-hint { font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+  .pre-back {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.08em;
+  }
+  .pre-back:hover { color: var(--accent); }
+
   /* RELOAD OVERLAY */
   #reload-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -461,6 +485,8 @@
 
   /* MOBILE */
   @media (max-width: 600px) {
+    #preloader, .pre-step { gap: 28px; }
+    .scn-card { width: min(300px, calc(100vw - 48px)); padding: 16px 20px; }
     .site-header { padding: 0 16px; }
     /* status line and the refresh button were squeezed into one row; stack them */
     .sentinel-bar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 16px; }
@@ -503,13 +529,34 @@
 <div id="preloader">
   <div class="pre-brand">WebCare · SENTINEL Demo</div>
   <div id="pre-headline">Welcome<br><span>Your friendly Sentinel</span></div>
-  <div style="font-size:11px;letter-spacing:0.12em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;">· Step 1 · Choose your language to begin ·</div>
-  <div class="lang-picker">
-    <button class="lang-btn" onclick="chooseLang('ru')"><span class="flag">🇷🇺</span> Русский</button>
-    <button class="lang-btn" onclick="chooseLang('en')"><span class="flag">🇬🇧</span> English</button>
-    <button class="lang-btn" onclick="chooseLang('es')"><span class="flag">🇪🇸</span> Español</button>
+  <div class="pre-step" id="pre-step0">
+    <div class="pre-step-label">· Step 0 · Choose a scenario ·</div>
+    <div class="scn-picker">
+      <button class="scn-card" onclick="pickScenario('food')">
+        <span class="scn-ico">🍣</span>
+        <span class="scn-name">Restaurant</span>
+        <span class="scn-sub">Ресторан · Restaurante</span>
+        <span class="scn-hint">Orders, menu prices, kitchen hours<br>EatWell</span>
+      </button>
+      <button class="scn-card" onclick="pickScenario('salon')">
+        <span class="scn-ico">💅</span>
+        <span class="scn-name">Beauty salon</span>
+        <span class="scn-sub">Салон красоты · Salón de belleza</span>
+        <span class="scn-hint">Booking requests, service prices, request window<br>Bloom Studio</span>
+      </button>
+    </div>
+    <div class="pre-note">One SENTINEL · two different businesses</div>
   </div>
-  <div class="pre-note">SENTINEL · Language detection</div>
+  <div class="pre-step" id="pre-step1" style="display:none;">
+    <div style="font-size:11px;letter-spacing:0.12em;color:var(--accent);text-transform:uppercase;margin-bottom:4px;">· Step 1 · Choose your language to begin ·</div>
+    <div class="lang-picker">
+      <button class="lang-btn" onclick="chooseLang('ru')"><span class="flag">🇷🇺</span> Русский</button>
+      <button class="lang-btn" onclick="chooseLang('en')"><span class="flag">🇬🇧</span> English</button>
+      <button class="lang-btn" onclick="chooseLang('es')"><span class="flag">🇪🇸</span> Español</button>
+    </div>
+    <div class="pre-note">SENTINEL · Language detection</div>
+    <button class="pre-back" onclick="showStep0()">← Scenario</button>
+  </div>
 </div>
 
 <!-- WELCOME MODAL -->
@@ -904,6 +951,24 @@ const TOUR_STEPS_SALON = {
   ],
 };
 
+const WELCOME_SALON_BODY = {
+  ru: 'Система изначально поддерживает несколько языков. Языки легко настраиваются под вашу аудиторию.<br><br>Сейчас покажем, как WebCare работает на примере салона красоты.',
+  en: "The system supports multiple languages from day one. Languages are easily customizable for your audience.<br><br>Now let's show you how WebCare works on a beauty salon example.",
+  es: 'El sistema admite varios idiomas desde el primer día. Los idiomas son fácilmente personalizables para tu audiencia.<br><br>Ahora vamos a mostrarte cómo funciona WebCare con un ejemplo de salón de belleza.',
+};
+
+// Step 0 of the demo: the visitor picks the business first; the palette switches at once.
+function pickScenario(next) {
+  scenario = next;
+  applyScenarioUI();
+  document.getElementById('pre-step0').style.display = 'none';
+  document.getElementById('pre-step1').style.display = 'flex';
+}
+function showStep0() {
+  document.getElementById('pre-step1').style.display = 'none';
+  document.getElementById('pre-step0').style.display = 'flex';
+}
+
 // Content getters: everything that used to read T[lang] / MENU / TOUR_STEPS[lang] goes through these.
 function getT() {
   const base = T[lang];
@@ -972,7 +1037,7 @@ function chooseLang(l) {
     // Show welcome modal in chosen language
     const w = WELCOME[lang];
     document.getElementById('welcome-title').textContent = w.title;
-    document.getElementById('welcome-body').innerHTML = w.body;
+    document.getElementById('welcome-body').innerHTML = scenario === 'salon' ? WELCOME_SALON_BODY[lang] : w.body;
     document.getElementById('welcome-btn').textContent = w.btn;
     document.getElementById('welcome-overlay').style.display = 'flex';
   }, 480);
